@@ -49,6 +49,7 @@ DEFAULT_CONFIG = {
     "ip_allowlist": [],
     "ip_denylist": [],
     "trust_x_forwarded_for": False,
+    "preserve_host": False,
     "disabled_rules": [],
     "security_headers": {
         "X-Content-Type-Options": "nosniff",
@@ -336,9 +337,15 @@ class WAFHandler(BaseHTTPRequestHandler):
             conn.putrequest(self.command, self.path, skip_host=True, skip_accept_encoding=True)
             for key, value in self.headers.items():
                 lk = key.lower()
-                if lk in HOP_BY_HOP or lk in ("content-length", "x-forwarded-for", "x-request-id"):
+                if lk in HOP_BY_HOP or lk in ("content-length", "x-forwarded-for", "x-request-id", "host"):
                     continue
                 conn.putheader(key, value)
+            # Most hosting platforms route by Host, so send the upstream's own name
+            # unless preserve_host is set (needed only for vhosts that expect the public name).
+            if ctx.cfg["preserve_host"] and self.headers.get("Host"):
+                conn.putheader("Host", self.headers.get("Host"))
+            else:
+                conn.putheader("Host", up.netloc)
             prior = self.headers.get("X-Forwarded-For")
             conn.putheader("X-Forwarded-For", f"{prior}, {ip}" if prior else ip)
             conn.putheader("X-Request-ID", rid)

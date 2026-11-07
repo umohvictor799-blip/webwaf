@@ -21,6 +21,7 @@ class EchoHandler(BaseHTTPRequestHandler):
         out = json.dumps({
             "method": self.command,
             "path": self.path,
+            "host": self.headers.get("Host", ""),
             "body": body.decode("utf-8", "replace"),
         }).encode()
         self.send_response(200)
@@ -88,6 +89,11 @@ class ForwardingTests(WAFTestBase):
         _, headers, _ = request(self.port, "GET", "/")
         self.assertEqual(headers["x-content-type-options"], "nosniff")
         self.assertEqual(headers["x-frame-options"], "SAMEORIGIN")
+
+    def test_host_header_rewritten_to_upstream(self):
+        status, _, data = request(self.port, "GET", "/", headers={"Host": "public.example.com"})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(data)["host"], f"127.0.0.1:{self.upstream.server_address[1]}")
 
     def test_client_ip_appended_to_forwarded_for(self):
         _, headers, _ = request(self.port, "GET", "/",
