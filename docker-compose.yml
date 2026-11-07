@@ -1,0 +1,36 @@
+# Production layout:
+#   internet -> caddy (HTTPS, ports 80/443) -> waf (internal only) -> your app
+#
+# Set SITE_DOMAIN in a .env file, e.g.  SITE_DOMAIN=example.com
+# and point the app service at your real application image.
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SITE_DOMAIN=${SITE_DOMAIN:?set SITE_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - waf
+
+  waf:
+    build: .
+    restart: unless-stopped
+    # No "ports:" here on purpose: the WAF is reachable only through Caddy.
+    depends_on:
+      - app
+
+  # Replace this placeholder with your real application.
+  app:
+    image: nginx:alpine
+
+volumes:
+  caddy_data:
+  caddy_config:

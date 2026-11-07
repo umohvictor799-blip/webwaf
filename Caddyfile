@@ -1,0 +1,8 @@
+# Caddy terminates HTTPS (certificates are obtained automatically)
+# and forwards every request to the WAF.
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy waf:8080 {
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

@@ -107,6 +107,9 @@ match a user's complaint to its log entry.
 
 ## Files
 
+- `DEPLOY.md` - production deployment with Docker Compose and automatic HTTPS (Caddy)
+- `Dockerfile`, `docker-compose.yml`, `Caddyfile`, `config/waf.json` - deployment files
+
 - `waf.py` - the firewall (single file, standard library only)
 - `test_waf.py` - automated tests (`python3 -m unittest -v test_waf`)
 - `README.md` - this file

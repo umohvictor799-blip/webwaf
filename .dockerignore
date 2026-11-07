@@ -1,0 +1,7 @@
+.git
+__pycache__
+*.pyc
+waf.log
+*.zip
+*.bundle
+test_waf.py

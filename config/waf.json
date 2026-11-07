@@ -1,0 +1,9 @@
+{
+  "listen_host": "0.0.0.0",
+  "listen_port": 8080,
+  "upstream": "http://app:80",
+  "block_mode": true,
+  "trust_x_forwarded_for": true,
+  "log_file": "",
+  "rate_limit": {"window_seconds": 10, "max_requests": 100, "ban_seconds": 300}
+}
